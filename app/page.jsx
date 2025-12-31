@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { days } from "../data/days";
 
-// Achievements
+// ------------------ Achievements ------------------
 const achievementsList = [
   { name: "Brass", streak: 30, message: "Congrats on a full month of reading the Bible!", color: "#B5A642" },
   { name: "Bronze", streak: 50, message: "50 days of dedication! Amazing!", color: "#CD7F32" },
@@ -12,7 +12,7 @@ const achievementsList = [
   { name: "Platinum", streak: 365, message: "365 days! Legendary!", color: "#E5E4E2" },
 ];
 
-// Streak intro
+// ------------------ Streak Intro ------------------
 function StreakIntro({ streak, onContinue }) {
   const [animate, setAnimate] = useState(false);
   useEffect(() => { const t = setTimeout(() => setAnimate(true), 100); return () => clearTimeout(t); }, []);
@@ -29,7 +29,7 @@ function StreakIntro({ streak, onContinue }) {
   );
 }
 
-// Profile modal
+// ------------------ Profile Modal ------------------
 function ProfileModal({ onClose, onLogin, onSignup }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -43,12 +43,19 @@ function ProfileModal({ onClose, onLogin, onSignup }) {
   }
 
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,transition:"opacity 0.3s ease"}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:mode==="login"?"scale(1)":"scale(0.9)",transition:"transform 0.3s ease"}}>
         <h2>{mode==="login"?"Log In":"Sign Up"}</h2>
         {mode==="signup" && <>
           <input placeholder="Username" value={username} onChange={e=>setUsername(e.target.value)} style={{width:"100%",marginBottom:8}}/>
-          <input placeholder="Avatar URL" value={avatar} onChange={e=>setAvatar(e.target.value)} style={{width:"100%",marginBottom:8}}/>
+          <input type="file" accept="image/png, image/jpeg" onChange={e=>{
+            const file = e.target.files[0];
+            if(file){
+              const reader = new FileReader();
+              reader.onload = ()=> setAvatar(reader.result);
+              reader.readAsDataURL(file);
+            }
+          }} style={{width:"100%",marginBottom:8}}/>
         </>}
         <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} style={{width:"100%",marginBottom:8}}/>
         <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{width:"100%",marginBottom:8}}/>
@@ -60,7 +67,7 @@ function ProfileModal({ onClose, onLogin, onSignup }) {
   )
 }
 
-// Profile page
+// ------------------ Profile Page ------------------
 function ProfilePage({ profile, onClose }) {
   if(!profile) return null;
   return (
@@ -82,11 +89,11 @@ function ProfilePage({ profile, onClose }) {
   )
 }
 
-// Settings modal
-function SettingsModal({ darkMode, setDarkMode, musicVolume, setMusicVolume, onClear }) {
+// ------------------ Settings Modal ------------------
+function SettingsModal({ darkMode, setDarkMode, musicVolume, setMusicVolume, onClear, onClose }) {
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
         <h2>Settings</h2>
         <label>
           <input type="checkbox" checked={darkMode} onChange={()=>{setDarkMode(!darkMode); localStorage.setItem("darkMode", JSON.stringify(!darkMode));}}/>
@@ -97,16 +104,17 @@ function SettingsModal({ darkMode, setDarkMode, musicVolume, setMusicVolume, onC
           <input type="range" min={0} max={1} step={0.01} value={musicVolume} onChange={e=>{setMusicVolume(parseFloat(e.target.value)); localStorage.setItem("musicVolume", e.target.value);}}/>
         </div>
         <button onClick={onClear} style={{marginTop:10}}>Clear Cache</button>
+        <button onClick={onClose} style={{marginTop:10}}>Close</button>
       </div>
     </div>
   );
 }
 
-// Resources modal
+// ------------------ Resources Modal ------------------
 function ResourcesModal({ onClose }) {
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
         <h2>Resources</h2>
         <p><a href="https://www.bible.com/" target="_blank">Bible.com</a></p>
         <p><a href="https://www.youtube.com/@bibleproject" target="_blank">BibleProject YouTube</a></p>
@@ -116,11 +124,11 @@ function ResourcesModal({ onClose }) {
   );
 }
 
-// Contact modal
+// ------------------ Contact Modal ------------------
 function ContactModal({ onClose }) {
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
         <h2>Contact</h2>
         <p>Email: <a href="mailto:plaworkshop7@gmail.com">plaworkshop7@gmail.com</a></p>
         <button onClick={onClose} style={{marginTop:10}}>Close</button>
@@ -129,6 +137,7 @@ function ContactModal({ onClose }) {
   );
 }
 
+// ------------------ Main Page ------------------
 export default function Page() {
   const [currentDay,setCurrentDay]=useState(1);
   const [dayOpacity,setDayOpacity]=useState(1);
@@ -139,8 +148,6 @@ export default function Page() {
   const [darkMode,setDarkMode]=useState(false);
   const [musicVolume,setMusicVolume]=useState(0.5);
   const [jumpDay,setJumpDay]=useState("");
-
-  // Profile
   const [profile,setProfile]=useState(null);
   const [showProfileModal,setShowProfileModal]=useState(false);
   const [showProfilePage,setShowProfilePage]=useState(false);
@@ -151,7 +158,6 @@ export default function Page() {
   const day = days.find(d=>d.day===currentDay);
   if(!day) return null;
 
-  // ------------------- Client-side Initialization -------------------
   useEffect(()=>{
     if(typeof window==="undefined")return;
     if(!localStorage.getItem("introSeen")) setShowIntro(true);
@@ -195,7 +201,7 @@ export default function Page() {
     }
   },[currentDay,streak,profile]);
 
-  const changeDay=(newDay)=>{setDayOpacity(0); setTimeout(()=>{setCurrentDay(newDay); setDayOpacity(1)},250);}
+  const changeDay=(newDay)=>{setDayOpacity(0); setTimeout(()=>{setCurrentDay(newDay); setDayOpacity(1)},300);}
   const nextDay=()=>{if(currentDay<365)changeDay(currentDay+1);}
   const prevDay=()=>{if(currentDay>1)changeDay(currentDay-1);}
   const handleJournalChange=(e)=>{const value=e.target.value; setJournal(value); if(typeof window!=="undefined") localStorage.setItem(`journal-day-${currentDay}`,value);}
@@ -221,7 +227,6 @@ export default function Page() {
     setShowProfileModal(false);
   }
   const clearCache=()=>{localStorage.clear(); window.location.reload();}
-
   const progressPercent = Math.round((completedDays/365)*100);
   if(showIntro) return <StreakIntro streak={streak} onContinue={handleContinueIntro}/>;
 
@@ -254,7 +259,7 @@ export default function Page() {
       {/* Modals */}
       {showProfileModal && <ProfileModal onClose={()=>setShowProfileModal(false)} onLogin={handleLogin} onSignup={handleSignup}/>}
       {showProfilePage && <ProfilePage profile={profile} onClose={()=>setShowProfilePage(false)}/>}
-      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache}/>}
+      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache} onClose={()=>setShowSettings(false)} />}
       {showResources && <ResourcesModal onClose={()=>setShowResources(false)}/>}
       {showContact && <ContactModal onClose={()=>setShowContact(false)}/>}
 
@@ -267,14 +272,13 @@ export default function Page() {
 
       {/* Progress bar */}
       <div style={{background:"#ddd",borderRadius:10,height:20,width:"100%",marginBottom:20}}>
-        <div style={{width:`${progressPercent}%`,height:"100%",backgroundColor:"#6B3E26",borderRadius:10,transition:"width 0.3s"}}></div>
+        <div style={{width:`${progressPercent}%`,height:"100%",backgroundColor:"#6B3E26",borderRadius:10,transition:"width 0.5s ease-in-out"}}></div>
       </div>
 
       {/* Day content */}
-      <div style={{opacity:dayOpacity,transition:"opacity 0.25s ease",padding:20,backgroundColor:darkMode?"#3B3B3B":"#FFF8E7",borderRadius:12,marginBottom:20}}>
-        <h2>Day {day.day}</h2>
-        <p style={{ fontWeight:"bold", fontSize:18, color:"#8B4513"}}>Old Testament: {day.oldTestament}</p>
-        <p style={{ fontWeight:"bold", fontSize:18, color:"#6A5ACD"}}>New Testament: {day.newTestament}</p>
+      <div style={{opacity:dayOpacity,transition:"opacity 0.3s ease, transform 0.3s ease",transform:dayOpacity===0?"translateY(20px)":"translateY(0px)",padding:20,backgroundColor:darkMode?"#3B3B3B":"#FFF8E7",borderRadius:12,marginBottom:20}}>
+        <p style={{fontWeight:"bold",fontSize:18,color:"#8B4513"}}>Old Testament: {day.oldTestament}</p>
+        <p style={{fontWeight:"bold",fontSize:18,color:"#6A5ACD"}}>New Testament: {day.newTestament}</p>
         <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Reflection</h3>
         <p style={{fontSize:18}}>{day.reflection}</p>
         <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Journaling Prompt</h3>
@@ -288,6 +292,6 @@ export default function Page() {
         <button onClick={nextDay} disabled={currentDay===365}>Next</button>
       </div>
     </div>
-  )
+  );
 }
 
