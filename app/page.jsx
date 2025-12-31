@@ -43,7 +43,7 @@ function ProfileModal({ onClose, onLogin, onSignup }) {
   }
 
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,transition:"opacity 0.3s ease"}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
       <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:mode==="login"?"scale(1)":"scale(0.9)",transition:"transform 0.3s ease"}}>
         <h2>{mode==="login"?"Log In":"Sign Up"}</h2>
         {mode==="signup" && <>
@@ -92,8 +92,8 @@ function ProfilePage({ profile, onClose }) {
 // ------------------ Settings Modal ------------------
 function SettingsModal({ darkMode, setDarkMode, musicVolume, setMusicVolume, onClear, onClose }) {
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
         <h2>Settings</h2>
         <label>
           <input type="checkbox" checked={darkMode} onChange={()=>{setDarkMode(!darkMode); localStorage.setItem("darkMode", JSON.stringify(!darkMode));}}/>
@@ -113,8 +113,8 @@ function SettingsModal({ darkMode, setDarkMode, musicVolume, setMusicVolume, onC
 // ------------------ Resources Modal ------------------
 function ResourcesModal({ onClose }) {
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
         <h2>Resources</h2>
         <p><a href="https://www.bible.com/" target="_blank">Bible.com</a></p>
         <p><a href="https://www.youtube.com/@bibleproject" target="_blank">BibleProject YouTube</a></p>
@@ -127,8 +127,8 @@ function ResourcesModal({ onClose }) {
 // ------------------ Contact Modal ------------------
 function ContactModal({ onClose }) {
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
+    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
+      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300}}>
         <h2>Contact</h2>
         <p>Email: <a href="mailto:plaworkshop7@gmail.com">plaworkshop7@gmail.com</a></p>
         <button onClick={onClose} style={{marginTop:10}}>Close</button>
@@ -183,6 +183,23 @@ export default function Page() {
 
     const savedProfile = JSON.parse(localStorage.getItem("profile"));
     if(savedProfile) setProfile(savedProfile);
+
+    // ------------------ Notifications ------------------
+    if("Notification" in window && Notification.permission!=="granted") Notification.requestPermission();
+    const todayDate = new Date();
+    const monthDay = `${todayDate.getMonth()+1}-${todayDate.getDate()}`;
+    const holidays = {
+      "4-7":"Good Friday",
+      "4-9":"Easter",
+      "12-25":"Christmas"
+    };
+    if(holidays[monthDay]){
+      new Notification("Religious Holiday Reminder", {body:`The Bible reminds us the true blessings of ${holidays[monthDay]}`});
+    }
+    if(!localStorage.getItem(`journal-day-${currentDay}`)){
+      new Notification("Daily Journal Reminder", {body:"Don't forget to complete today's Bible journal!"});
+    }
+
   },[]);
 
   useEffect(()=>{
@@ -206,12 +223,11 @@ export default function Page() {
   const prevDay=()=>{if(currentDay>1)changeDay(currentDay-1);}
   const handleJournalChange=(e)=>{const value=e.target.value; setJournal(value); if(typeof window!=="undefined") localStorage.setItem(`journal-day-${currentDay}`,value);}
   const handleContinueIntro=()=>{
-    if(typeof window!=="undefined") localStorage.setItem("introSeen","true");
+    if(typeof window==="undefined") return;
+    localStorage.setItem("introSeen","true");
     setShowIntro(false);
-    if(typeof window!=="undefined"){
-      const audio=document.getElementById("backgroundMusic");
-      if(audio){ audio.volume=musicVolume; audio.play().catch(err=>console.log("Autoplay prevented",err));}
-    }
+    const audio=document.getElementById("backgroundMusic");
+    if(audio){ audio.volume=musicVolume; audio.play().catch(err=>console.log("Autoplay prevented",err)); }
   }
 
   const handleLogin=(data)=>{
@@ -228,106 +244,79 @@ export default function Page() {
   }
   const clearCache=()=>{localStorage.clear(); window.location.reload();}
   const progressPercent = Math.round((completedDays/365)*100);
+
   if(showIntro) return <StreakIntro streak={streak} onContinue={handleContinueIntro}/>;
 
   return (
     <div style={{minHeight:"100vh",backgroundColor:darkMode?"#2B2B2B":"#FBF7F2",color:darkMode?"#EDEDED":"#000",fontFamily:"Georgia, serif",padding:24,transition:"all 0.5s ease"}}>
-      <audio id="backgroundMusic" loop>
+      <audio id="backgroundMusic" loop preload="auto">
         <source src="/music/peaceful.mp3" type="audio/mpeg"/>
       </audio>
 
-      {/* Header */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
+      {/* ------------------ Header ------------------ */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
         <div style={{display:"flex",gap:10}}>
           <button onClick={()=>setCurrentDay(1)}>Home</button>
           <button onClick={()=>setShowSettings(true)}>Settings</button>
         </div>
-        <h1 style={{color:"#6B3E26"}}>Bible in 365 Days</h1>
+        <h1 style={{textAlign:"center",color:"#8B4513"}}>Bible in 365 Days</h1>
         <div style={{display:"flex",gap:10}}>
           <button onClick={()=>setShowResources(true)}>Resources</button>
           <button onClick={()=>setShowContact(true)}>Contact</button>
         </div>
       </div>
 
-      {/* Profile Circle */}
-      <div style={{display:"flex",justifyContent:"center",marginBottom:24}}>
-        <div onClick={()=>{profile?setShowProfilePage(true):setShowProfileModal(true)}} style={{width:60,height:60,borderRadius:"50%",overflow:"hidden",cursor:"pointer"}}>
-          <img src={profile?.avatar||"/default-avatar.png"} style={{width:"100%",height:"100%"}}/>
-        </div>
+      {/* ------------------ Profile Circle ------------------ */}
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <button onClick={()=>{profile?setShowProfilePage(true):setShowProfileModal(true)}} style={{borderRadius:"50%",width:80,height:80,overflow:"hidden",border:"2px solid #8B4513"}}>
+          <img src={profile?.avatar||"/default-avatar.png"} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+        </button>
       </div>
 
-      {/* Modals */}
-      {showProfileModal && <ProfileModal onClose={()=>setShowProfileModal(false)} onLogin={handleLogin} onSignup={handleSignup}/>}
-      {showProfilePage && <ProfilePage profile={profile} onClose={()=>setShowProfilePage(false)}/>}
-      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache} onClose={()=>setShowSettings(false)} />}
-      {showResources && <ResourcesModal onClose={()=>setShowResources(false)}/>}
-      {showContact && <ContactModal onClose={()=>setShowContact(false)}/>}
+      {/* ------------------ Progress Bar ------------------ */}
+      <div style={{height:12,width:"100%",background:"#ddd",borderRadius:6,marginBottom:20}}>
+        <div style={{width:`${progressPercent}%`,height:"100%",background:"#6B3E26",borderRadius:6,transition:"width 0.5s ease"}}></div>
+      </div>
 
-      {/* Day controls */}
+      {/* ------------------ Calendar / Jump to Day ------------------ */}
       <div style={{marginBottom:20}}>
-        <button onClick={()=>{ const dayNum=prompt("Enter day (1-365)"); if(dayNum) changeDay(Math.min(365,Math.max(1,parseInt(dayNum)))); }}>Jump to Day</button>
-        <button onClick={()=>{ localStorage.removeItem("bookmarkedDay"); alert("Bookmark cleared!"); }}>Clear Bookmark</button>
-        <input type="date" value={jumpDay} onChange={e=>{setJumpDay(e.target.value); const d=new Date(e.target.value); if(!isNaN(d)) {const dayIndex=Math.floor((d - new Date(d.getFullYear(),0,1))/86400000)+1; changeDay(dayIndex)}}}/>
+        <input type="number" placeholder="Go to day" value={jumpDay} onChange={e=>setJumpDay(e.target.value)} style={{width:100,marginRight:10}}/>
+        <button onClick={()=>{const dayNum=parseInt(jumpDay); if(dayNum>=1 && dayNum<=365) changeDay(dayNum)}}>Go</button>
+        <button onClick={()=>localStorage.removeItem("bookmarkedDay")}>Clear Bookmark</button>
       </div>
 
-      {/* Progress bar */}
-      <div style={{background:"#ddd",borderRadius:10,height:20,width:"100%",marginBottom:20}}>
-        <div style={{width:`${progressPercent}%`,height:"100%",backgroundColor:"#6B3E26",borderRadius:10,transition:"width 0.5s ease-in-out"}}></div>
-      </div>
-
-      {/* -------------------- Day Content -------------------- */}
-      <div style={{
-        opacity: dayOpacity,
-        transition:"opacity 0.3s ease, transform 0.3s ease",
-        transform: dayOpacity===0?"translateY(20px)":"translateY(0px)",
-        padding: 20,
-        backgroundColor: darkMode?"#3B3B3B":"#FFF8E7",
-        borderRadius: 12,
-        marginBottom: 20
-      }}>
+      {/* ------------------ Day Content ------------------ */}
+      <div style={{opacity:dayOpacity,transition:"opacity 0.3s ease, transform 0.3s ease",transform: dayOpacity===0?"translateY(20px)":"translateY(0px)",padding:20,backgroundColor:darkMode?"#3B3B3B":"#FFF8E7",borderRadius:12,marginBottom:20}}>
         <h2 style={{textAlign:"center", fontSize:28, marginBottom:20, color:"#8B4513"}}>Day {day.day}</h2>
-        
-        <div style={{
-          background: darkMode?"#4B4B4B":"#FDEBD0",
-          padding:15,
-          borderRadius:10,
-          marginBottom:15,
-          boxShadow: "2px 2px 8px rgba(0,0,0,0.2)"
-        }}>
-          <p style={{fontWeight:"bold", fontSize:20, color:"#8B4513"}}>Old Testament</p>
-          <p style={{fontSize:18, marginTop:5}}>{day.oldTestament}</p>
+
+        <div style={{background: darkMode?"#4B4B4B":"#FDEBD0", padding:15, borderRadius:10, marginBottom:15}}>
+          <strong>Old Testament:</strong> <span style={{fontWeight:"bold"}}>{day.oldTestament}</span>
         </div>
 
-        <div style={{
-          background: darkMode?"#4B4B4B":"#D6EAF8",
-          padding:15,
-          borderRadius:10,
-          marginBottom:15,
-          boxShadow: "2px 2px 8px rgba(0,0,0,0.2)"
-        }}>
-          <p style={{fontWeight:"bold", fontSize:20, color:"#154360"}}>New Testament</p>
-          <p style={{fontSize:18, marginTop:5}}>{day.newTestament}</p>
+        <div style={{background: darkMode?"#4B4B4B":"#FDEBD0", padding:15, borderRadius:10, marginBottom:15}}>
+          <strong>New Testament:</strong> <span style={{fontWeight:"bold"}}>{day.newTestament}</span>
         </div>
 
-        <h3 style={{marginTop:20, fontSize:22, color:"#A0522D"}}>Reflection</h3>
-        <p style={{fontSize:18}}>{day.reflection}</p>
+        <h3 style={{fontSize:22,color:"#6B3E26"}}>Reflection</h3>
+        <p style={{fontSize:18,marginBottom:15}}>{day.reflection}</p>
 
-        <h3 style={{marginTop:20, fontSize:22, color:"#A0522D"}}>Journaling Prompt</h3>
-        <p style={{fontSize:18}}>{day.prompt}</p>
-
-        <textarea
-          value={journal}
-          onChange={handleJournalChange}
-          placeholder="Write your journal entry here..."
-          style={{width:"100%", height:100, marginTop:10, padding:10, fontSize:16, borderRadius:8, border:"1px solid #ccc"}}
-        />
+        <h3 style={{fontSize:22,color:"#6B3E26"}}>Journaling Prompt</h3>
+        <textarea value={journal} onChange={handleJournalChange} style={{width:"100%",minHeight:80,fontSize:16,padding:8,borderRadius:8,resize:"vertical"}}/>
       </div>
 
-      {/* Navigation */}
+      {/* ------------------ Navigation Buttons ------------------ */}
       <div style={{display:"flex",justifyContent:"space-between"}}>
         <button onClick={prevDay} disabled={currentDay===1}>Previous</button>
         <button onClick={nextDay} disabled={currentDay===365}>Next</button>
       </div>
+
+      {/* ------------------ Modals ------------------ */}
+      {showProfileModal && <ProfileModal onClose={()=>setShowProfileModal(false)} onLogin={handleLogin} onSignup={handleSignup}/>}
+      {showProfilePage && <ProfilePage profile={profile} onClose={()=>setShowProfilePage(false)}/>}
+      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache} onClose={()=>setShowSettings(false)}/>}
+      {showResources && <ResourcesModal onClose={()=>setShowResources(false)}/>}
+      {showContact && <ContactModal onClose={()=>setShowContact(false)}/>}
     </div>
   );
 }
+
