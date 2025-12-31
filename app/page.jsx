@@ -275,15 +275,52 @@ export default function Page() {
         <div style={{width:`${progressPercent}%`,height:"100%",backgroundColor:"#6B3E26",borderRadius:10,transition:"width 0.5s ease-in-out"}}></div>
       </div>
 
-      {/* Day content */}
-      <div style={{opacity:dayOpacity,transition:"opacity 0.3s ease, transform 0.3s ease",transform:dayOpacity===0?"translateY(20px)":"translateY(0px)",padding:20,backgroundColor:darkMode?"#3B3B3B":"#FFF8E7",borderRadius:12,marginBottom:20}}>
-        <p style={{fontWeight:"bold",fontSize:18,color:"#8B4513"}}>Old Testament: {day.oldTestament}</p>
-        <p style={{fontWeight:"bold",fontSize:18,color:"#6A5ACD"}}>New Testament: {day.newTestament}</p>
-        <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Reflection</h3>
+      {/* -------------------- Day Content -------------------- */}
+      <div style={{
+        opacity: dayOpacity,
+        transition:"opacity 0.3s ease, transform 0.3s ease",
+        transform: dayOpacity===0?"translateY(20px)":"translateY(0px)",
+        padding: 20,
+        backgroundColor: darkMode?"#3B3B3B":"#FFF8E7",
+        borderRadius: 12,
+        marginBottom: 20
+      }}>
+        <h2 style={{textAlign:"center", fontSize:28, marginBottom:20, color:"#8B4513"}}>Day {day.day}</h2>
+        
+        <div style={{
+          background: darkMode?"#4B4B4B":"#FDEBD0",
+          padding:15,
+          borderRadius:10,
+          marginBottom:15,
+          boxShadow: "2px 2px 8px rgba(0,0,0,0.2)"
+        }}>
+          <p style={{fontWeight:"bold", fontSize:20, color:"#8B4513"}}>Old Testament</p>
+          <p style={{fontSize:18, marginTop:5}}>{day.oldTestament}</p>
+        </div>
+
+        <div style={{
+          background: darkMode?"#4B4B4B":"#D6EAF8",
+          padding:15,
+          borderRadius:10,
+          marginBottom:15,
+          boxShadow: "2px 2px 8px rgba(0,0,0,0.2)"
+        }}>
+          <p style={{fontWeight:"bold", fontSize:20, color:"#154360"}}>New Testament</p>
+          <p style={{fontSize:18, marginTop:5}}>{day.newTestament}</p>
+        </div>
+
+        <h3 style={{marginTop:20, fontSize:22, color:"#A0522D"}}>Reflection</h3>
         <p style={{fontSize:18}}>{day.reflection}</p>
-        <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Journaling Prompt</h3>
+
+        <h3 style={{marginTop:20, fontSize:22, color:"#A0522D"}}>Journaling Prompt</h3>
         <p style={{fontSize:18}}>{day.prompt}</p>
-        <textarea value={journal} onChange={handleJournalChange} placeholder="Write your journal entry here..." style={{width:"100%",height:100,marginTop:10,padding:10,fontSize:16}}/>
+
+        <textarea
+          value={journal}
+          onChange={handleJournalChange}
+          placeholder="Write your journal entry here..."
+          style={{width:"100%", height:100, marginTop:10, padding:10, fontSize:16, borderRadius:8, border:"1px solid #ccc"}}
+        />
       </div>
 
       {/* Navigation */}
@@ -294,4 +331,3 @@ export default function Page() {
     </div>
   );
 }
-
