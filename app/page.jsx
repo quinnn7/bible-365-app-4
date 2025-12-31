@@ -3,294 +3,232 @@
 import { useState, useEffect } from "react";
 import { days } from "../data/days";
 
-// ------------------ Achievements ------------------
+// Achievement definitions
 const achievementsList = [
-  { name: "Brass", streak: 30, message: "Congrats on a full month of reading the Bible!", color: "#B5A642" },
-  { name: "Bronze", streak: 50, message: "50 days of dedication! Amazing!", color: "#CD7F32" },
-  { name: "Silver", streak: 100, message: "100 days! Incredible consistency!", color: "#C0C0C0" },
-  { name: "Gold", streak: 200, message: "200 days! Outstanding!", color: "#FFD700" },
-  { name: "Platinum", streak: 365, message: "365 days! Legendary!", color: "#E5E4E2" },
+  { name: "Brass", streak: 30, message: "Congratulations on a full month of reading the Bible!", color: "#B5A642" },
+  { name: "Bronze", streak: 50, message: "Amazing! You've reached a 50-day streak!", color: "#CD7F32" },
+  { name: "Silver", streak: 100, message: "Incredible! 100 days of dedication!", color: "#C0C0C0" },
+  { name: "Gold", streak: 200, message: "Outstanding! 200 days of consistent reading!", color: "#FFD700" },
+  { name: "Platinum", streak: 365, message: "Legendary! You completed the full year!", color: "#E5E4E2" },
 ];
 
-// ------------------ Streak Intro ------------------
+// Streak intro screen
 function StreakIntro({ streak, onContinue }) {
   const [animate, setAnimate] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setAnimate(true), 100); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimate(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"#FBF7F2",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,transition:"opacity 0.5s ease",opacity: animate?1:0}}>
-      <div style={{transform: animate?"scale(1)":"scale(0.5)",opacity: animate?1:0,transition:"all 1s ease",textAlign:"center"}}>
-        <h1 style={{fontSize:48,color:"#6B3E26",marginBottom:20}}>🔥 Your Current Streak 🔥</h1>
-        <p style={{fontSize:36,color:"#8A6A52",marginBottom:40}}>{streak} {streak===1?"day":"days"}</p>
-        <button onClick={onContinue} style={{padding:"12px 24px",fontSize:20,borderRadius:10,border:"none",backgroundColor:"#6B3E26",color:"#FBF7F2",cursor:"pointer",transition:"transform 0.2s ease"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.05)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-          Continue
-        </button>
+    <div style={{
+      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+      backgroundColor: "#FBF7F2", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999,
+      transition: "opacity 0.5s ease", opacity: animate ? 1 : 0
+    }}>
+      <div style={{ transform: animate ? "scale(1)" : "scale(0.5)", opacity: animate ? 1 : 0, transition: "all 1s ease", textAlign: "center" }}>
+        <h1 style={{ fontSize: 48, color: "#6B3E26", marginBottom: 20 }}>🔥 Your Current Streak 🔥</h1>
+        <p style={{ fontSize: 36, color: "#8A6A52", marginBottom: 40 }}>{streak} {streak === 1 ? "day" : "days"}</p>
+        <button onClick={onContinue} style={{
+          padding: "12px 24px", fontSize: 20, borderRadius: 10, border: "none", backgroundColor: "#6B3E26", color: "#FBF7F2", cursor: "pointer", transition: "transform 0.2s ease"
+        }}
+          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+        >Continue</button>
       </div>
     </div>
   );
 }
 
-// ------------------ Profile Modal ------------------
-function ProfileModal({ onClose, onLogin, onSignup }) {
-  const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [avatar, setAvatar] = useState("");
-
-  const handleSubmit = () => {
-    if(mode==="login") onLogin({email,password});
-    else onSignup({email,password,username,avatar});
-  }
-
-  return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:mode==="login"?"scale(1)":"scale(0.9)",transition:"transform 0.3s ease"}}>
-        <h2>{mode==="login"?"Log In":"Sign Up"}</h2>
-        {mode==="signup" && <>
-          <input placeholder="Username" value={username} onChange={e=>setUsername(e.target.value)} style={{width:"100%",marginBottom:8}}/>
-          <input type="file" accept="image/png, image/jpeg" onChange={e=>{
-            const file = e.target.files[0];
-            if(file){
-              const reader = new FileReader();
-              reader.onload = ()=> setAvatar(reader.result);
-              reader.readAsDataURL(file);
-            }
-          }} style={{width:"100%",marginBottom:8}}/>
-        </>}
-        <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} style={{width:"100%",marginBottom:8}}/>
-        <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{width:"100%",marginBottom:8}}/>
-        <button onClick={handleSubmit} style={{width:"100%",padding:8,marginBottom:8}}>{mode==="login"?"Log In":"Sign Up"}</button>
-        <button onClick={()=>setMode(mode==="login"?"signup":"login")} style={{width:"100%",padding:8}}>{mode==="login"?"Switch to Sign Up":"Switch to Log In"}</button>
-        <button onClick={onClose} style={{marginTop:8,width:"100%"}}>Close</button>
-      </div>
-    </div>
-  )
-}
-
-// ------------------ Profile Page ------------------
-function ProfilePage({ profile, onClose }) {
-  if(!profile) return null;
-  return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:350}}>
-        <h2>Profile</h2>
-        <img src={profile.avatar||"/default-avatar.png"} style={{width:80,height:80,borderRadius:"50%"}}/>
-        <p>Username: {profile.username}</p>
-        <p>Email: {profile.email}</p>
-        <p>Current Streak: {profile.currentStreak||0}</p>
-        <p>Best Streak: {profile.bestStreak||0}</p>
-        <h3>Achievements:</h3>
-        <ul>
-          {achievementsList.map(a => profile.bestStreak>=a.streak?<li key={a.name} style={{color:a.color}}>{a.name}: {a.message}</li>:null)}
-        </ul>
-        <button onClick={onClose} style={{marginTop:10}}>Close</button>
-      </div>
-    </div>
-  )
-}
-
-// ------------------ Settings Modal ------------------
-function SettingsModal({ darkMode, setDarkMode, musicVolume, setMusicVolume, onClear, onClose }) {
-  return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
-        <h2>Settings</h2>
-        <label>
-          <input type="checkbox" checked={darkMode} onChange={()=>{setDarkMode(!darkMode); localStorage.setItem("darkMode", JSON.stringify(!darkMode));}}/>
-          Dark Mode
-        </label>
-        <div>
-          <label>Music Volume: {Math.round(musicVolume*100)}%</label>
-          <input type="range" min={0} max={1} step={0.01} value={musicVolume} onChange={e=>{setMusicVolume(parseFloat(e.target.value)); localStorage.setItem("musicVolume", e.target.value);}}/>
-        </div>
-        <button onClick={onClear} style={{marginTop:10}}>Clear Cache</button>
-        <button onClick={onClose} style={{marginTop:10}}>Close</button>
-      </div>
-    </div>
-  );
-}
-
-// ------------------ Resources Modal ------------------
-function ResourcesModal({ onClose }) {
-  return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
-        <h2>Resources</h2>
-        <p><a href="https://www.bible.com/" target="_blank">Bible.com</a></p>
-        <p><a href="https://www.youtube.com/@bibleproject" target="_blank">BibleProject YouTube</a></p>
-        <button onClick={onClose} style={{marginTop:10}}>Close</button>
-      </div>
-    </div>
-  );
-}
-
-// ------------------ Contact Modal ------------------
-function ContactModal({ onClose }) {
-  return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",backgroundColor:"rgba(0,0,0,0.5)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:9999,opacity:1,transition:"opacity 0.3s ease"}}>
-      <div style={{background:"#FFF",padding:20,borderRadius:12,width:300,transform:"scale(1)",transition:"transform 0.3s ease"}}>
-        <h2>Contact</h2>
-        <p>Email: <a href="mailto:plaworkshop7@gmail.com">plaworkshop7@gmail.com</a></p>
-        <button onClick={onClose} style={{marginTop:10}}>Close</button>
-      </div>
-    </div>
-  );
-}
-
-// ------------------ Main Page ------------------
 export default function Page() {
-  const [currentDay,setCurrentDay]=useState(1);
-  const [dayOpacity,setDayOpacity]=useState(1);
-  const [journal,setJournal]=useState("");
-  const [completedDays,setCompletedDays]=useState(0);
-  const [streak,setStreak]=useState(0);
-  const [showIntro,setShowIntro]=useState(false);
-  const [darkMode,setDarkMode]=useState(false);
-  const [musicVolume,setMusicVolume]=useState(0.5);
-  const [jumpDay,setJumpDay]=useState("");
-  const [profile,setProfile]=useState(null);
-  const [showProfileModal,setShowProfileModal]=useState(false);
-  const [showProfilePage,setShowProfilePage]=useState(false);
-  const [showSettings,setShowSettings]=useState(false);
-  const [showResources,setShowResources]=useState(false);
-  const [showContact,setShowContact]=useState(false);
+  const [currentDay, setCurrentDay] = useState(1);
+  const [dayOpacity, setDayOpacity] = useState(1);
+  const [jumpDay, setJumpDay] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [journal, setJournal] = useState("");
+  const [completedDays, setCompletedDays] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showIntro, setShowIntro] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showResources, setShowResources] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [musicVolume, setMusicVolume] = useState(0.5);
 
-  const day = days.find(d=>d.day===currentDay);
-  if(!day) return null;
+  // Profile states
+  const [profile, setProfile] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showProfilePage, setShowProfilePage] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "", username: "", avatar: "" });
+  const [newAchievement, setNewAchievement] = useState(null);
 
-  useEffect(()=>{
-    if(typeof window==="undefined")return;
-    if(!localStorage.getItem("introSeen")) setShowIntro(true);
+  const day = days.find(d => d.day === currentDay);
+  if (!day) return null;
+
+  // ================= Browser-side initialization =================
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Intro
+    if (!localStorage.getItem("introSeen")) setShowIntro(true);
+
+    // Bookmarked day
     const savedBookmark = localStorage.getItem("bookmarkedDay");
-    if(savedBookmark) setCurrentDay(parseInt(savedBookmark));
+    if (savedBookmark) setCurrentDay(parseInt(savedBookmark));
 
-    const savedStreak = JSON.parse(localStorage.getItem("streak"))||{count:0,lastDate:null};
-    const today = new Date().toISOString().slice(0,10);
-    if(savedStreak.lastDate){
-      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-      if(savedStreak.lastDate===yesterday)savedStreak.count+=1;
-      else if(savedStreak.lastDate!==today)savedStreak.count=1;
-    } else savedStreak.count=1;
-    savedStreak.lastDate=today;
-    localStorage.setItem("streak",JSON.stringify(savedStreak));
+    // Streak calculation
+    const savedStreak = JSON.parse(localStorage.getItem("streak")) || { count: 0, lastDate: null };
+    const today = new Date().toISOString().slice(0, 10);
+    if (savedStreak.lastDate) {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (savedStreak.lastDate === yesterday) savedStreak.count += 1;
+      else if (savedStreak.lastDate !== today) savedStreak.count = 1;
+    } else savedStreak.count = 1;
+    savedStreak.lastDate = today;
+    localStorage.setItem("streak", JSON.stringify(savedStreak));
     setStreak(savedStreak.count);
 
-    const savedDarkMode = JSON.parse(localStorage.getItem("darkMode"))||false;
+    // Dark mode
+    const savedDarkMode = JSON.parse(localStorage.getItem("darkMode")) || false;
     setDarkMode(savedDarkMode);
 
-    const savedVolume = parseFloat(localStorage.getItem("musicVolume"))||0.5;
+    // Music volume
+    const savedVolume = parseFloat(localStorage.getItem("musicVolume")) || 0.5;
     setMusicVolume(savedVolume);
 
-    const savedProfile = JSON.parse(localStorage.getItem("profile"));
-    if(savedProfile) setProfile(savedProfile);
-  },[]);
+    const audio = document.getElementById("backgroundMusic");
+    if (audio) audio.volume = savedVolume;
 
-  useEffect(()=>{
-    if(typeof window==="undefined")return;
-    localStorage.setItem("bookmarkedDay",currentDay);
-    const savedJournal = localStorage.getItem(`journal-day-${currentDay}`)||"";
+    // Load profile
+    const savedProfile = JSON.parse(localStorage.getItem("profile"));
+    if (savedProfile) setProfile(savedProfile);
+
+  }, []);
+
+  // ================= Update day & journal =================
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    localStorage.setItem("bookmarkedDay", currentDay);
+
+    const savedJournal = localStorage.getItem(`journal-day-${currentDay}`) || "";
     setJournal(savedJournal);
-    const completed = days.filter(d=>localStorage.getItem(`journal-day-${d.day}`)).length;
+
+    const completed = days.filter(d => localStorage.getItem(`journal-day-${d.day}`)).length;
     setCompletedDays(completed);
 
-    if(profile){
-      const updatedProfile={...profile,currentStreak:streak};
-      if(!updatedProfile.bestStreak || streak>updatedProfile.bestStreak) updatedProfile.bestStreak=streak;
+    // Update profile streaks if logged in
+    if (profile) {
+      const updatedProfile = { ...profile, currentStreak: streak };
+      if (!updatedProfile.bestStreak || streak > updatedProfile.bestStreak) updatedProfile.bestStreak = streak;
       setProfile(updatedProfile);
-      localStorage.setItem("profile",JSON.stringify(updatedProfile));
+      localStorage.setItem("profile", JSON.stringify(updatedProfile));
     }
-  },[currentDay,streak,profile]);
 
-  const changeDay=(newDay)=>{setDayOpacity(0); setTimeout(()=>{setCurrentDay(newDay); setDayOpacity(1)},300);}
-  const nextDay=()=>{if(currentDay<365)changeDay(currentDay+1);}
-  const prevDay=()=>{if(currentDay>1)changeDay(currentDay-1);}
-  const handleJournalChange=(e)=>{const value=e.target.value; setJournal(value); if(typeof window!=="undefined") localStorage.setItem(`journal-day-${currentDay}`,value);}
-  const handleContinueIntro=()=>{
-    if(typeof window!=="undefined") localStorage.setItem("introSeen","true");
+  }, [currentDay, streak, profile]);
+
+  // ================= Achievement unlock =================
+  useEffect(() => {
+    if (!profile) return;
+    achievementsList.forEach(a => {
+      if (streak >= a.streak && profile.bestStreak < a.streak) {
+        setNewAchievement(a);
+        setTimeout(() => setNewAchievement(null), 3000);
+      }
+    });
+  }, [streak, profile]);
+
+  // ================= Navigation helpers =================
+  const changeDay = (newDay) => { setDayOpacity(0); setTimeout(() => { setCurrentDay(newDay); setDayOpacity(1); }, 250); };
+  const nextDay = () => { if (currentDay < 365) changeDay(currentDay + 1); }
+  const prevDay = () => { if (currentDay > 1) changeDay(currentDay - 1); }
+  const jumpToDay = () => { const num = parseInt(jumpDay); if (!isNaN(num) && num >= 1 && num <= 365) changeDay(num); setJumpDay(""); }
+
+  const handleDateChange = (value) => {
+    setSelectedDate(value);
+    if (!value) return;
+    const pickedDate = new Date(value);
+    const startOfYear = new Date(pickedDate.getFullYear(), 0, 1);
+    const diffTime = pickedDate - startOfYear;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    if (diffDays >= 1 && diffDays <= 365) changeDay(diffDays);
+  }
+
+  const handleJournalChange = (e) => {
+    const value = e.target.value;
+    setJournal(value);
+    if (typeof window !== "undefined") localStorage.setItem(`journal-day-${currentDay}`, value);
+  }
+
+  const handleContinueIntro = () => {
+    if (typeof window !== "undefined") localStorage.setItem("introSeen", "true");
     setShowIntro(false);
-    if(typeof window!=="undefined"){
-      const audio=document.getElementById("backgroundMusic");
-      if(audio){ audio.volume=musicVolume; audio.play().catch(err=>console.log("Autoplay prevented",err));}
-    }
+    const audio = document.getElementById("backgroundMusic");
+    if (audio) audio.play().catch(err => console.log("Autoplay prevented", err));
   }
 
-  const handleLogin=(data)=>{
-    const saved = JSON.parse(localStorage.getItem("profile"));
-    if(saved && saved.email===data.email && saved.password===data.password){
-      setProfile(saved);
-      setShowProfileModal(false);
-    } else alert("Invalid login");
-  }
-  const handleSignup=(data)=>{
-    setProfile({...data,currentStreak:0,bestStreak:0});
-    localStorage.setItem("profile",JSON.stringify({...data,currentStreak:0,bestStreak:0}));
-    setShowProfileModal(false);
-  }
-  const clearCache=()=>{localStorage.clear(); window.location.reload();}
-  const progressPercent = Math.round((completedDays/365)*100);
-  if(showIntro) return <StreakIntro streak={streak} onContinue={handleContinueIntro}/>;
+  // Progress percentage
+  const progressPercent = Math.round((completedDays / 365) * 100);
+
+  if (showIntro) return <StreakIntro streak={streak} onContinue={handleContinueIntro} />;
 
   return (
-    <div style={{minHeight:"100vh",backgroundColor:darkMode?"#2B2B2B":"#FBF7F2",color:darkMode?"#EDEDED":"#000",fontFamily:"Georgia, serif",padding:24,transition:"all 0.5s ease"}}>
+    <div style={{
+      minHeight: "100vh",
+      backgroundColor: darkMode ? "#2B2B2B" : "#FBF7F2",
+      color: darkMode ? "#EDEDED" : "#000",
+      fontFamily: "Georgia, serif",
+      padding: 24,
+      transition: "all 0.5s ease"
+    }}>
+
+      {/* Audio */}
       <audio id="backgroundMusic" loop>
-        <source src="/music/peaceful.mp3" type="audio/mpeg"/>
+        <source src="/music/peaceful.mp3" type="audio/mpeg" />
       </audio>
 
-      {/* Header */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-        <div style={{display:"flex",gap:10}}>
-          <button onClick={()=>setCurrentDay(1)}>Home</button>
-          <button onClick={()=>setShowSettings(true)}>Settings</button>
+      {/* Achievement animation */}
+      {newAchievement && (
+        <div style={{
+          position: "fixed", top: "30%", left: "50%", transform: "translate(-50%,-50%)",
+          backgroundColor: newAchievement.color, padding: 20, borderRadius: 12,
+          color: "#000", textAlign: "center", zIndex: 1000,
+          animation: "popIn 0.5s ease, fadeOut 0.5s 2.5s ease forwards"
+        }}>
+          <h2>{newAchievement.name} Achievement!</h2>
+          <p>{newAchievement.message}</p>
         </div>
-        <h1 style={{color:"#6B3E26"}}>Bible in 365 Days</h1>
-        <div style={{display:"flex",gap:10}}>
-          <button onClick={()=>setShowResources(true)}>Resources</button>
-          <button onClick={()=>setShowContact(true)}>Contact</button>
-        </div>
-      </div>
+      )}
 
-      {/* Profile Circle */}
-      <div style={{display:"flex",justifyContent:"center",marginBottom:24}}>
-        <div onClick={()=>{profile?setShowProfilePage(true):setShowProfileModal(true)}} style={{width:60,height:60,borderRadius:"50%",overflow:"hidden",cursor:"pointer"}}>
-          <img src={profile?.avatar||"/default-avatar.png"} style={{width:"100%",height:"100%"}}/>
-        </div>
-      </div>
-
-      {/* Modals */}
-      {showProfileModal && <ProfileModal onClose={()=>setShowProfileModal(false)} onLogin={handleLogin} onSignup={handleSignup}/>}
-      {showProfilePage && <ProfilePage profile={profile} onClose={()=>setShowProfilePage(false)}/>}
-      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache} onClose={()=>setShowSettings(false)} />}
-      {showResources && <ResourcesModal onClose={()=>setShowResources(false)}/>}
-      {showContact && <ContactModal onClose={()=>setShowContact(false)}/>}
-
-      {/* Day controls */}
-      <div style={{marginBottom:20}}>
-        <button onClick={()=>{ const dayNum=prompt("Enter day (1-365)"); if(dayNum) changeDay(Math.min(365,Math.max(1,parseInt(dayNum)))); }}>Jump to Day</button>
-        <button onClick={()=>{ localStorage.removeItem("bookmarkedDay"); alert("Bookmark cleared!"); }}>Clear Bookmark</button>
-        <input type="date" value={jumpDay} onChange={e=>{setJumpDay(e.target.value); const d=new Date(e.target.value); if(!isNaN(d)) {const dayIndex=Math.floor((d - new Date(d.getFullYear(),0,1))/86400000)+1; changeDay(dayIndex)}}}/>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{background:"#ddd",borderRadius:10,height:20,width:"100%",marginBottom:20}}>
-        <div style={{width:`${progressPercent}%`,height:"100%",backgroundColor:"#6B3E26",borderRadius:10,transition:"width 0.5s ease-in-out"}}></div>
-      </div>
+      <style>{`
+        @keyframes popIn {
+          0% { transform: translate(-50%,-50%) scale(0.5); opacity:0; }
+          100% { transform: translate(-50%,-50%) scale(1); opacity:1; }
+        }
+        @keyframes fadeOut {
+          0% { opacity:1; }
+          100% { opacity:0; }
+        }
+      `}</style>
 
       {/* Day content */}
-      <div style={{opacity:dayOpacity,transition:"opacity 0.3s ease, transform 0.3s ease",transform:dayOpacity===0?"translateY(20px)":"translateY(0px)",padding:20,backgroundColor:darkMode?"#3B3B3B":"#FFF8E7",borderRadius:12,marginBottom:20}}>
-        <p style={{fontWeight:"bold",fontSize:18,color:"#8B4513"}}>Old Testament: {day.oldTestament}</p>
-        <p style={{fontWeight:"bold",fontSize:18,color:"#6A5ACD"}}>New Testament: {day.newTestament}</p>
-        <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Reflection</h3>
-        <p style={{fontSize:18}}>{day.reflection}</p>
-        <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Journaling Prompt</h3>
-        <p style={{fontSize:18}}>{day.prompt}</p>
-        <textarea value={journal} onChange={handleJournalChange} placeholder="Write your journal entry here..." style={{width:"100%",height:100,marginTop:10,padding:10,fontSize:16}}/>
+      <div style={{ opacity: dayOpacity, transition: "opacity 0.25s ease" }}>
+        <h2>Day {day.day}</h2>
+        <p style={{ fontWeight: "bold", fontSize: 18, color: "#8B4513" }}>Old Testament: {day.oldTestament}</p>
+        <p style={{ fontWeight: "bold", fontSize: 18, color: "#A0522D" }}>New Testament: {day.newTestament}</p>
+        <h3 style={{ fontSize: 22, color: "#6B3E26" }}>Reflection</h3>
+        <p style={{ fontSize: 18 }}>{day.reflection}</p>
+        <h3 style={{ fontSize: 22, color: "#6B3E26" }}>Journaling Prompt</h3>
+        <p style={{ fontSize: 18 }}>{day.prompt}</p>
+
+        <textarea value={journal} onChange={handleJournalChange} placeholder="Write your journal entry..." style={{ width: "100%", minHeight: 120, padding: 8, borderRadius: 8, border: "1px solid #ccc", marginTop: 10, resize: "vertical" }}></textarea>
+
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
+          <button onClick={prevDay} disabled={currentDay === 1}>Previous</button>
+          <button onClick={nextDay} disabled={currentDay === 365}>Next</button>
+        </div>
+
+        <p style={{ marginTop: 10 }}>Progress: {completedDays} days completed ({progressPercent}%)</p>
       </div>
 
-      {/* Navigation */}
-      <div style={{display:"flex",justifyContent:"space-between"}}>
-        <button onClick={prevDay} disabled={currentDay===1}>Previous</button>
-        <button onClick={nextDay} disabled={currentDay===365}>Next</button>
-      </div>
     </div>
   );
 }
