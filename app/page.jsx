@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { days } from "../data/days";
 
-// Achievement definitions
+// Achievements
 const achievementsList = [
   { name: "Brass", streak: 30, message: "Congrats on a full month of reading the Bible!", color: "#B5A642" },
   { name: "Bronze", streak: 50, message: "50 days of dedication! Amazing!", color: "#CD7F32" },
@@ -12,7 +12,7 @@ const achievementsList = [
   { name: "Platinum", streak: 365, message: "365 days! Legendary!", color: "#E5E4E2" },
 ];
 
-// Streak intro screen
+// Streak intro
 function StreakIntro({ streak, onContinue }) {
   const [animate, setAnimate] = useState(false);
   useEffect(() => { const t = setTimeout(() => setAnimate(true), 100); return () => clearTimeout(t); }, []);
@@ -21,13 +21,15 @@ function StreakIntro({ streak, onContinue }) {
       <div style={{transform: animate?"scale(1)":"scale(0.5)",opacity: animate?1:0,transition:"all 1s ease",textAlign:"center"}}>
         <h1 style={{fontSize:48,color:"#6B3E26",marginBottom:20}}>🔥 Your Current Streak 🔥</h1>
         <p style={{fontSize:36,color:"#8A6A52",marginBottom:40}}>{streak} {streak===1?"day":"days"}</p>
-        <button onClick={onContinue} style={{padding:"12px 24px",fontSize:20,borderRadius:10,border:"none",backgroundColor:"#6B3E26",color:"#FBF7F2",cursor:"pointer",transition:"transform 0.2s ease"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.05)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>Continue</button>
+        <button onClick={onContinue} style={{padding:"12px 24px",fontSize:20,borderRadius:10,border:"none",backgroundColor:"#6B3E26",color:"#FBF7F2",cursor:"pointer",transition:"transform 0.2s ease"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.05)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
+          Continue
+        </button>
       </div>
     </div>
   );
 }
 
-// Profile modal (signup/login)
+// Profile modal
 function ProfileModal({ onClose, onLogin, onSignup }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -55,7 +57,7 @@ function ProfileModal({ onClose, onLogin, onSignup }) {
         <button onClick={onClose} style={{marginTop:8,width:"100%"}}>Close</button>
       </div>
     </div>
-  );
+  )
 }
 
 // Profile page
@@ -77,7 +79,7 @@ function ProfilePage({ profile, onClose }) {
         <button onClick={onClose} style={{marginTop:10}}>Close</button>
       </div>
     </div>
-  );
+  )
 }
 
 // Settings modal
@@ -136,7 +138,9 @@ export default function Page() {
   const [showIntro,setShowIntro]=useState(false);
   const [darkMode,setDarkMode]=useState(false);
   const [musicVolume,setMusicVolume]=useState(0.5);
+  const [jumpDay,setJumpDay]=useState("");
 
+  // Profile
   const [profile,setProfile]=useState(null);
   const [showProfileModal,setShowProfileModal]=useState(false);
   const [showProfilePage,setShowProfilePage]=useState(false);
@@ -175,7 +179,6 @@ export default function Page() {
     if(savedProfile) setProfile(savedProfile);
   },[]);
 
-  // Update day & journal
   useEffect(()=>{
     if(typeof window==="undefined")return;
     localStorage.setItem("bookmarkedDay",currentDay);
@@ -204,6 +207,7 @@ export default function Page() {
       if(audio){ audio.volume=musicVolume; audio.play().catch(err=>console.log("Autoplay prevented",err));}
     }
   }
+
   const handleLogin=(data)=>{
     const saved = JSON.parse(localStorage.getItem("profile"));
     if(saved && saved.email===data.email && saved.password===data.password){
@@ -223,8 +227,6 @@ export default function Page() {
 
   return (
     <div style={{minHeight:"100vh",backgroundColor:darkMode?"#2B2B2B":"#FBF7F2",color:darkMode?"#EDEDED":"#000",fontFamily:"Georgia, serif",padding:24,transition:"all 0.5s ease"}}>
-
-      {/* Audio */}
       <audio id="backgroundMusic" loop>
         <source src="/music/peaceful.mp3" type="audio/mpeg"/>
       </audio>
@@ -249,30 +251,43 @@ export default function Page() {
         </div>
       </div>
 
+      {/* Modals */}
       {showProfileModal && <ProfileModal onClose={()=>setShowProfileModal(false)} onLogin={handleLogin} onSignup={handleSignup}/>}
       {showProfilePage && <ProfilePage profile={profile} onClose={()=>setShowProfilePage(false)}/>}
-      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache} />}
+      {showSettings && <SettingsModal darkMode={darkMode} setDarkMode={setDarkMode} musicVolume={musicVolume} setMusicVolume={setMusicVolume} onClear={clearCache}/>}
       {showResources && <ResourcesModal onClose={()=>setShowResources(false)}/>}
       {showContact && <ContactModal onClose={()=>setShowContact(false)}/>}
 
+      {/* Day controls */}
+      <div style={{marginBottom:20}}>
+        <button onClick={()=>{ const dayNum=prompt("Enter day (1-365)"); if(dayNum) changeDay(Math.min(365,Math.max(1,parseInt(dayNum)))); }}>Jump to Day</button>
+        <button onClick={()=>{ localStorage.removeItem("bookmarkedDay"); alert("Bookmark cleared!"); }}>Clear Bookmark</button>
+        <input type="date" value={jumpDay} onChange={e=>{setJumpDay(e.target.value); const d=new Date(e.target.value); if(!isNaN(d)) {const dayIndex=Math.floor((d - new Date(d.getFullYear(),0,1))/86400000)+1; changeDay(dayIndex)}}}/>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{background:"#ddd",borderRadius:10,height:20,width:"100%",marginBottom:20}}>
+        <div style={{width:`${progressPercent}%`,height:"100%",backgroundColor:"#6B3E26",borderRadius:10,transition:"width 0.3s"}}></div>
+      </div>
+
       {/* Day content */}
-      <div style={{opacity:dayOpacity,transition:"opacity 0.25s ease"}}>
+      <div style={{opacity:dayOpacity,transition:"opacity 0.25s ease",padding:20,backgroundColor:darkMode?"#3B3B3B":"#FFF8E7",borderRadius:12,marginBottom:20}}>
         <h2>Day {day.day}</h2>
         <p style={{ fontWeight:"bold", fontSize:18, color:"#8B4513"}}>Old Testament: {day.oldTestament}</p>
-        <p style={{ fontWeight:"bold", fontSize:18, color:"#A0522D"}}>New Testament: {day.newTestament}</p>
-        <h3 style={{ fontSize:22, color:"#6B3E26"}}>Reflection</h3>
-        <p style={{ fontSize:18}}>{day.reflection}</p>
-        <h3 style={{ fontSize:22, color:"#6B3E26"}}>Journaling Prompt</h3>
-        <p style={{ fontSize:18}}>{day.prompt}</p>
+        <p style={{ fontWeight:"bold", fontSize:18, color:"#6A5ACD"}}>New Testament: {day.newTestament}</p>
+        <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Reflection</h3>
+        <p style={{fontSize:18}}>{day.reflection}</p>
+        <h3 style={{marginTop:20,fontSize:20,color:"#A0522D"}}>Journaling Prompt</h3>
+        <p style={{fontSize:18}}>{day.prompt}</p>
+        <textarea value={journal} onChange={handleJournalChange} placeholder="Write your journal entry here..." style={{width:"100%",height:100,marginTop:10,padding:10,fontSize:16}}/>
+      </div>
 
-        <textarea value={journal} onChange={handleJournalChange} placeholder="Write your journal entry..." style={{width:"100%", minHeight:120, padding:8, borderRadius:8, border:"1px solid #ccc", marginTop:10, resize:"vertical"}}></textarea>
-
-        <div style={{display:"flex", justifyContent:"space-between", marginTop:20}}>
-          <button onClick={prevDay} disabled={currentDay===1}>Previous</button>
-          <button onClick={nextDay} disabled={currentDay===365}>Next</button>
-        </div>
-        <p style={{marginTop:10}}>Progress: {completedDays} days completed ({progressPercent}%)</p>
+      {/* Navigation */}
+      <div style={{display:"flex",justifyContent:"space-between"}}>
+        <button onClick={prevDay} disabled={currentDay===1}>Previous</button>
+        <button onClick={nextDay} disabled={currentDay===365}>Next</button>
       </div>
     </div>
-  );
+  )
 }
+
